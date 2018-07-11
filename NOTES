@@ -1,0 +1,10 @@
+find all the intervals that overlap with a given interval N
+
+sort all start and end points.  store each with a pointer to the segment it's on
+then do binary search looking for the left endpoint of N
+look for the start and end points that are < N.r
+if there are any, put all the segments they point to into a set
+
+next have to find intervals that *enclose* N
+use an interval tree and look for any point in N.
+
