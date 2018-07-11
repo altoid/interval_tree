@@ -1,10 +1,11 @@
 # intervals are [a..b) where a <= b
 # for now they are just tuples
 
+
 class ITNode:
     def __init__(self, center, intervals):
         self.center = center
-        self.intervals = intervals # might be empty or none
+        self.intervals = intervals  # might be empty or none
         self.left = None
         self.right = None
 
@@ -18,7 +19,10 @@ class ITNode:
                 ','.join([str(x) for x in self.intervals]))
         return s
 
+
 class ITree:
+    # note:  to construct the tree you have to have all of your intervals available up front.  if you add or remove
+    # intervals you have to rebalance the tree.
 
     def __init__(self):
         self.root = None
@@ -40,13 +44,13 @@ class ITree:
                 straddle.append(i)
 
         left_child = None
-        if len(left_intervals) > 0:
+        if left_intervals:
             left_child = self.insert(left_intervals, left_bound, middle)
 
         right_child = None
-        if len(right_intervals) > 0:
+        if right_intervals:
             right_child = self.insert(right_intervals, middle, right_bound)
-        
+
         if left_child or right_child or straddle:
             node = ITNode(middle, straddle)
             node.left = left_child
@@ -80,8 +84,8 @@ class ITree:
         if not node.left and not node.right:
             return
 
-        self.ptree(node.left, level+1)
-        self.ptree(node.right, level+1)
+        self.ptree(node.left, level + 1)
+        self.ptree(node.right, level + 1)
 
     def dump(self):
         self.ptree(self.root, 0)
@@ -109,4 +113,4 @@ class ITree:
 #    b. If the current interval overlaps with stack top and ending
 #        time of current interval is more than that of stack top, 
 #        update stack top with the ending  time of current interval.
-# 4. At the end stack contains the merged intervals. 
+# 4. At the end stack contains the merged intervals.

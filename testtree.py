@@ -4,11 +4,12 @@ import itree
 import pprint
 import unittest
 
+
 class TestITree(unittest.TestCase):
     def test_str(self):
         intervals = [
             (1, 4), (6, 8), (15, 19)
-            ]
+        ]
         n = itree.ITNode(2.78, intervals)
         print str(n)
 
@@ -21,7 +22,7 @@ class TestITree(unittest.TestCase):
     def test_ptree(self):
         intervals = [
             (8, 11), (10, 12), (9, 13)
-            ]
+        ]
         mytree = itree.ITree()
         mytree.construct(intervals)
         mytree.dump()
@@ -42,10 +43,21 @@ class TestITree(unittest.TestCase):
             (9, 13),
             (17, 20),
             (21, 24),
-            ]
+        ]
         mytree = itree.ITree()
         mytree.construct(intervals)
         mytree.dump()
+
+    def test_small(self):
+        intervals = [
+            (0, 8),
+            (1, 3),
+            (5, 7),
+        ]
+        mytree = itree.ITree()
+        mytree.construct(intervals)
+        mytree.dump()
+
 
 if __name__ == '__main__':
     unittest.main()
