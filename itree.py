@@ -27,6 +27,16 @@ class ITree:
     def __init__(self):
         self.root = None
 
+        # this consists of tuples that look like this:
+        #
+        # (x (y z))
+        #
+        # (y z) is an interval and x is either y or z.  we use this to sort all the x coordinates,
+        # and with each coordinate we maintain a reference to the interval it's in.
+
+        self.sorted_coordinates = []
+
+
     def insert(self, intervals, left_bound, right_bound):
         middle = (left_bound + right_bound) / 2.0
 
@@ -61,6 +71,7 @@ class ITree:
         # find range of entire interval set
         imax = None
         imin = None
+
         for i in intervals:
             if not imin:
                 imin = i[0]
@@ -73,7 +84,11 @@ class ITree:
             if i[1] > imax:
                 imax = i[1]
 
+            self.sorted_coordinates.append((i[0], i))
+            self.sorted_coordinates.append((i[1], i))
+
         self.root = self.insert(intervals, imin, imax)
+        self.sorted_coordinates = sorted(self.sorted_coordinates, key=lambda x: x[0])
 
     def ptree(self, node, level):
         if not node:
@@ -90,17 +105,71 @@ class ITree:
     def dump(self):
         self.ptree(self.root, 0)
 
-    def find_at_node(self, node, findme):
-        # check whether findme straddles
-        # whether any left endpoint of a straddler is in findme
-        # whether any right endpoint of a straddler is in findme
-        pass
+    def find_intervals_for_point_helper(self, x, node):
+        if not node:
+            return
 
-    def find_interval(self, findme):
-        '''
-        give me the intervals in this collection that findme touches.
-        '''
-        return self.find_at_node(self.root, findme)
+        for i in node.intervals:
+            if i[0] <= x < i[1]:
+                yield i
+
+        if x <= node.center:
+            for i in self.find_intervals_for_point_helper(x, node.left):
+                yield i
+        elif x > node.center:
+            for i in self.find_intervals_for_point_helper(x, node.right):
+                yield i
+
+    def find_intervals_for_point(self, x):
+        for i in self.find_intervals_for_point_helper(x, self.root):
+            yield i
+
+    def find_leftmost_coordinate(self, x, left, right):
+        if right < left:
+            return None
+
+        if right == left:
+            return self.sorted_coordinates[left][0]
+
+        m = (right + left) / 2
+        if x <= self.sorted_coordinates[m][0]:
+            return self.find_leftmost_coordinate(x, left, m)
+        return self.find_leftmost_coordinate(x, m + 1, right)
+
+    def find_intervals_for_interval(self, r):
+        # find the leftmost coordinate that is >= r[0]
+
+        i = self.find_leftmost_coordinate(r[0], 0, len(self.sorted_coordinates) - 1)
+        if not i:
+            return
+
+        # coords[i] will be <= r[0].  we want the leftmost coord that is <= r[0].  so iterate.
+        # if any coord is == r[0], wind back to the left to find them all.
+        while i >= 0 and self.sorted_coordinates[i][0] == r[0]:
+            i -= 1
+
+        while i < len(self.sorted_coordinates):
+            if self.sorted_coordinates[i][0] >= r[0]:
+                break
+            i += 1
+
+        if i > len(self.sorted_coordinates):
+            return
+
+        result = set()
+        while i < len(self.sorted_coordinates):
+            if self.sorted_coordinates[i][1][0] < r[1] or self.sorted_coordinates[i][1][1] < r[1]:
+                result.add(self.sorted_coordinates[i][1])
+            i += 1
+
+        # now look for any intervals that enclose r.
+        for i in self.find_intervals_for_point((r[0] + r[1]) / 2.0):
+            result.add(i)
+
+        for e in result:
+            yield e
+
+
 
 # merging overlapping intervals
 # 
