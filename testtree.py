@@ -48,11 +48,29 @@ class TestITree(unittest.TestCase):
         mytree = itree.ITree()
         mytree.construct(intervals)
         mytree.dump()
-        for x in mytree.find_intervals_for_point(16):
-            print x
 
-        for x in mytree.find_intervals_for_interval((7, 11)):
-            print x
+        icontrol = {(15, 19), (14, 18)}
+        itest = {x for x in mytree.find_intervals_for_point(16)}
+        self.assertEqual(icontrol, itest)
+
+        icontrol = {
+            (9, 13),
+            (8, 11),
+            (6, 8),
+            (1, 12),
+            (10, 12),
+        }
+        itest = set([x for x in mytree.find_intervals_for_interval((7, 11))])
+        self.assertEqual(icontrol, itest)
+
+        icontrol = {
+            (9, 13),
+            (8, 11),
+            (1, 12),
+            (10, 12),
+        }
+        itest = set([x for x in mytree.find_intervals_for_interval((8, 11))])
+        self.assertEqual(icontrol, itest)
 
     def test_small(self):
         intervals = [

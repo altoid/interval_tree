@@ -158,8 +158,15 @@ class ITree:
 
         result = set()
         while i < len(self.sorted_coordinates):
-            if self.sorted_coordinates[i][1][0] < r[1] or self.sorted_coordinates[i][1][1] < r[1]:
-                result.add(self.sorted_coordinates[i][1])
+
+            test_interval = self.sorted_coordinates[i][1]
+
+            if test_interval[0] <= r[0] < test_interval[1]:
+                result.add(test_interval)
+
+            if test_interval[0] < r[1] < test_interval[1]:
+                result.add(test_interval)
+
             i += 1
 
         # now look for any intervals that enclose r.
